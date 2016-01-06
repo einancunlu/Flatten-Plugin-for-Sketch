@@ -2,7 +2,7 @@
 	"name": "Flatten", 
 	"description": "Flatten single or multiple layers instantly, keep them updated like a boss, create static blur effects to get performance boost and create shared artboard styles.",
     "author": "Emin Inanc Unlu",
-	"homepage": "",
+	"homepage": "https://github.com/einancunlu/Flatten-Plugin-for-Sketch",
     "version": 1.0,
 	"compatibleVersion": 3.4,
     "identifier": "com.einancunlu.sketch-plugins.flatten",
