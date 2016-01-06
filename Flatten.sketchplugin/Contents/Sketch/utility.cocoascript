@@ -1,0 +1,256 @@
+
+
+/* 
+The MIT License (MIT)
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE.
+*/
+
+
+function checkPluginUpdate() {
+
+	var manifestFilePath = scriptFolder + "/manifest.json"
+	var manifestJSON = getJSONFromFile(manifestFilePath)
+	var isThereNewVersion = false
+	try {
+		var response = getJSONFromURL('https://raw.githubusercontent.com/einancunlu/Disconnect-for-Sketch/master/Disconnect.sketchplugin/Contents/Sketch/manifest.json')
+		if (response && response.version) {
+			log(response.version)
+			log(manifestJSON.version)
+			if (response.version != manifestJSON.version) {
+				isThereNewVersion = true
+			}
+		}	
+	} catch (e) {
+		log(e)
+		return false
+	}
+	return isThereNewVersion
+}
+
+
+//--------------------------------------
+// UserDefaults
+//--------------------------------------
+
+
+function saveObjectToUserDefaults(object, key) {
+	
+	var configs  = [NSMutableDictionary dictionary]
+	[configs setObject: object forKey: key]
+	[defaults registerDefaults: configs]
+	[defaults synchronize]
+}
+
+
+//--------------------------------------
+// Folders
+//--------------------------------------
+
+
+function getTempFolderPath(withName) {
+	
+	var fileManager = [NSFileManager defaultManager]
+	var cachesURL = [[fileManager URLsForDirectory: NSCachesDirectory inDomains: NSUserDomainMask] lastObject]
+	if(typeof withName !== 'undefined') return [[cachesURL URLByAppendingPathComponent: kPluginDomain] path] + "/" + withName
+	return [[cachesURL URLByAppendingPathComponent: kPluginDomain] path] + "/" + [[NSDate date] timeIntervalSince1970]
+}
+
+function cleanUpTempFolder(folderPath) {
+	
+	[[NSFileManager defaultManager] removeItemAtPath: folderPath error: nil]
+}
+
+
+//--------------------------------------
+// JSON
+//--------------------------------------
+
+
+function getJSONFromFile(filePath) {
+	
+	var data = [NSData dataWithContentsOfFile: filePath]
+	return [NSJSONSerialization JSONObjectWithData: data options: 0 error: nil]
+}
+
+function getJSONFromURL(url) {
+	
+	var request = [NSURLRequest requestWithURL: [NSURL URLWithString:url]],
+		response = [NSURLConnection sendSynchronousRequest: request returningResponse: nil error: nil],
+		responseObj = [NSJSONSerialization JSONObjectWithData: response options: nil error: nil]
+	return responseObj
+}
+
+
+//--------------------------------------
+// Exporting
+//--------------------------------------
+
+
+function makeExportable(layer) {
+	
+	return [[layer exportOptions] addExportSize]
+}
+
+function removeExportOptions(layer) {
+	
+	[[[layer exportOptions] sizes] removeAllObjects]
+}
+
+function exportLayerToPath(layer, path, scale, format, suffix) {
+	
+	[[layer exportOptions] addExportSize]
+	var exportSize = [[[[layer exportOptions] sizes] array] lastObject],
+		rect = [[layer absoluteRect] rect],
+		scale = (typeof scale !== 'undefined') ? scale : 1,
+		suffix = (typeof suffix !== 'undefined') ? suffix : "",
+		format = (typeof format !== 'undefined') ? format : "png"
+	exportSize.scale = scale
+	exportSize.name = suffix
+	exportSize.format = format
+	var slice = [MSSliceMaker sliceFromExportSize:exportSize layer:layer inRect:rect useIDForName:false]
+	[doc saveArtboardOrSlice:slice toFile: path]
+	[exportSize remove]
+	slice = nil
+	exportSize = nil
+	return {
+	    x: Math.round(rect.origin.x),
+	    y: Math.round(rect.origin.y),
+	    width: Math.round(rect.size.width),
+	    height: Math.round(rect.size.height)
+	}
+}
+
+
+//--------------------------------------
+// Layer and Styling
+//--------------------------------------
+
+
+function getRect(layer) {
+	
+  var rect = [layer absoluteRect]
+  return {
+    x: Math.round([rect x]),
+    y: Math.round([rect y]),
+    width: Math.round([rect width]),
+    height: Math.round([rect height])
+  }
+}
+
+function removeLayer(layer) {
+	
+  var parent = [layer parentGroup]
+  if (parent)[parent removeLayer: layer]
+}
+
+function addLayer(name, type, parent) {
+	
+  var parent = parent ? parent : stage,
+    layer = [parent addLayerOfType: type]
+  if (name)[layer setName: name]
+  return layer
+}
+
+function addGroup(name, parent) {
+	
+  return addLayer(name, 'group', parent)
+}
+
+function setBitmapFill(layer, imagePath) {
+	
+	var image = [[NSImage alloc] initWithContentsOfFile:imagePath]
+	if(image) {
+		if( [layer class] == MSShapeGroup ) {
+			var fills = layer.style().fills()
+		        for (var i = 0; i < fills.count(); i++) {
+		            fills.removeStylePartAtIndex(0)
+		        }
+				[fills addNewStylePart]
+			var bmpFill = [fills lastObject],
+				fillCollection = [[bmpFill documentData] images]
+				[bmpFill setFillType:4]
+				[bmpFill setPatternImage:image collection:fillCollection]
+				[bmpFill setPatternFillType:1]
+		}
+	}
+}
+
+
+//--------------------------------------
+// Finding Layers
+//--------------------------------------
+
+
+var findLayersByTag_inContainer = function(tag, container) {
+	
+	var regex = ".*" + tag + "\\b.*"
+	var predicate = NSPredicate.predicateWithFormat(@"name MATCHES[c] %@", regex)
+	return findLayersMatchingPredicate_inContainer_filterByType(predicate, container)
+}
+
+var findLayersNamed_inContainer_filterByType = function(layerName, container, layerType) {
+	
+    var predicate = (typeof layerType === 'undefined' || layerType == nil) ? NSPredicate.predicateWithFormat("name == %@", layerName) : NSPredicate.predicateWithFormat("name == %@ && class == %@", layerName, layerType)
+    return findLayersMatchingPredicate_inContainer_filterByType(predicate, container)
+}
+
+var findLayersMatchingPredicate_inContainer_filterByType = function(predicate, container, layerType) {
+	
+    var scope
+    switch (layerType) {
+        case MSPage: 
+            scope = doc.pages()
+            return scope.filteredArrayUsingPredicate(predicate)
+        break
+        case MSArtboardGroup:
+            if(typeof container !== 'undefined' && container != nil) {
+                if (container.className == "MSPage") {
+                    scope = container.artboards()
+                    return scope.filteredArrayUsingPredicate(predicate)
+                }
+            } else {
+                // search all pages
+                var filteredArray = NSArray.array()
+                var loopPages = doc.pages().objectEnumerator(), page;
+                while (page = loopPages.nextObject()) {
+                    scope = page.artboards()
+                    filteredArray = filteredArray.arrayByAddingObjectsFromArray(scope.filteredArrayUsingPredicate(predicate))
+                }
+                return filteredArray
+            }
+        break
+        default:
+            if(typeof container !== 'undefined' && container != nil) {
+                scope = container.children()
+                return scope.filteredArrayUsingPredicate(predicate)
+            } else {
+                // search all pages
+                var filteredArray = NSArray.array()
+                var loopPages = doc.pages().objectEnumerator(), page;
+                while (page = loopPages.nextObject()) {
+                    scope = page.children()
+                    filteredArray = filteredArray.arrayByAddingObjectsFromArray(scope.filteredArrayUsingPredicate(predicate))
+                }
+                return filteredArray
+            }
+    }
+    return NSArray.array() // Return an empty array if no matches were found
+}
+

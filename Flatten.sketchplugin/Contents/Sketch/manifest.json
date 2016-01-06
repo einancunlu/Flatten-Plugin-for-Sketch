@@ -1,0 +1,115 @@
+{
+	"name": "Flatten", 
+	"description": "Flatten single or multiple layers instantly, keep them updated like a boss, create static blur effects to get performance boost and create shared artboard styles.",
+    "author": "Emin Inanc Unlu",
+	"homepage": "",
+    "version": 1.0,
+	"compatibleVersion": 3.4,
+    "identifier": "com.einancunlu.sketch-plugins.flatten",
+    "commands": [
+        {
+            "handler": "flatten",
+            "identifier": "flatten",
+            "name": "Flatten",
+			"shortcut" : "shift control f",
+            "script": "main.cocoascript"
+        },
+        {
+            "handler": "flattenAll",
+            "identifier": "flattenAll",
+            "name": "Flatten All",
+			"shortcut" : "",
+            "script": "main.cocoascript"
+        },
+        {
+            "handler": "switchToImageMode",
+            "identifier": "switchToImageMode",
+            "name": "Image Mode",
+			"shortcut" : "",
+            "script": "main.cocoascript"
+        },
+        {
+            "handler": "switchToLayerMode",
+            "identifier": "switchToLayerMode",
+            "name": "Layer Mode",
+			"shortcut" : "",
+            "script": "main.cocoascript"
+        },
+        {
+            "handler": "selectSuggestedLayers",
+            "identifier": "selectSuggestedLayers",
+            "name": "Suggest Layers",
+			"shortcut" : "",
+            "script": "main.cocoascript"
+        },
+        {
+            "handler": "addFlattenTagToSelections",
+            "identifier": "addFlattenTagToSelections",
+            "name": "#Flatten",
+			"shortcut" : "",
+            "script": "main.cocoascript"
+        },
+        {
+            "handler": "addFlattenHiddenTagToSelections",
+            "identifier": "addFlattenHiddenTagToSelections",
+            "name": "#FlattenHidden",
+			"shortcut" : "",
+            "script": "main.cocoascript"
+        },
+        {
+            "handler": "help",
+            "identifier": "help",
+            "name": "Help / Guide", 
+			"shortcut" : "",
+            "script": "main.cocoascript"
+        },
+        {
+            "handler": "feedbackByMail",
+            "identifier": "feedbackByMail",
+            "name": "Mail", 
+			"shortcut" : "",
+            "script": "main.cocoascript"
+        },
+        {
+            "handler": "feedbackByTwitter",
+            "identifier": "feedbackByTwitter",
+            "name": "Twitter", 
+			"shortcut" : "",
+            "script": "main.cocoascript"
+        },
+        {
+            "handler": "empty",
+            "identifier": "empty",
+            "name": " ",
+			"shortcut" : "",
+            "script": "main.cocoascript"
+        }
+    ],
+    "menu": { 
+		"title": "Flatten",
+        "items": [ 
+            "flatten",
+			"flattenAll", 
+			"selectSuggestedLayers", 
+			{
+				"title": "Add Tag",
+		        "items": [
+					"addFlattenTagToSelections",
+					"addFlattenHiddenTagToSelections"
+		        ]
+			},     
+			"empty",     
+			"switchToLayerMode",
+			"switchToImageMode", 
+			"empty",    
+			"help",
+			{
+				"title": "Feedback / Contact",
+		        "items": [
+					"feedbackByMail",
+					"feedbackByTwitter"
+		        ]
+			},
+        ]
+    }
+}
