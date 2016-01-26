@@ -395,7 +395,11 @@ function getImageLayerAndGroup(actualLayer) {
 		    	var childLayer = layers.objectAtIndex(i)
 				if ([command valueForKey: kImageLayerKey onLayer: childLayer]) {
 					updateImageLayerRect(childLayer, actualLayer)
-					parent.resizeRoot(true) 
+					if (getSketchVersionNumber() >= 350) {
+						parent.resizeToFitChildrenWithOption(1) 
+					} else {
+						parent.resizeRoot(true) 
+					}
 					return childLayer
 				}
 			}
@@ -414,8 +418,12 @@ function getImageLayerAndGroup(actualLayer) {
 	actualLayer.removeFromParent()
 	newGroup.addLayers([actualLayer])
 	[parent insertLayers: [newGroup] atIndex: indexOfLayer]
-	imageLayer = createImageLayer(actualLayer, newGroup)	
-	newGroup.resizeRoot(true)
+	imageLayer = createImageLayer(actualLayer, newGroup)
+	if (getSketchVersionNumber() >= 350) {
+		newGroup.resizeToFitChildrenWithOption(1) 
+	} else {
+		newGroup.resizeRoot(true) 
+	}
 	return imageLayer
 }
 

@@ -31,8 +31,6 @@ function checkPluginUpdate() {
 	try {
 		var response = getJSONFromURL('https://raw.githubusercontent.com/einancunlu/Flatten-Plugin-for-Sketch/master/Flatten.sketchplugin/Contents/Sketch/manifest.json')
 		if (response && response.version) {
-			log(response.version)
-			log(manifestJSON.version)
 			if (response.version != manifestJSON.version) {
 				isThereNewVersion = true
 			}
@@ -42,6 +40,16 @@ function checkPluginUpdate() {
 		return false
 	}
 	return isThereNewVersion
+}
+
+function getSketchVersionNumber() {
+	
+	const version = [[NSBundle mainBundle] objectForInfoDictionaryKey:@"CFBundleShortVersionString"]
+	var versionNumber = version.stringByReplacingOccurrencesOfString_withString(".", "") + ""
+	while(versionNumber.length != 3) {
+		versionNumber += "0"
+	}
+	return parseInt(versionNumber)
 }
 
 
@@ -103,9 +111,18 @@ function getJSONFromURL(url) {
 //--------------------------------------
 
 
-function makeExportable(layer) {
+function makeExportable(layer, format) {
+
+	var format = (typeof format !== 'undefined') ? format : "png"
+	if (getSketchVersionNumber() >= 350) {
+		var slice = layer.exportOptions().addExportFormat()
+		slice.setFileFormat(format)
+		return slice
+	}
 	
-	return [[layer exportOptions] addExportSize]
+	var slice = layer.exportOptions().addExportSize()
+	slice.setFormat(format)
+	return slice
 }
 
 function removeExportOptions(layer) {
@@ -115,16 +132,26 @@ function removeExportOptions(layer) {
 
 function exportLayerToPath(layer, path, scale, format, suffix) {
 	
-	[[layer exportOptions] addExportSize]
-	var exportSize = [[[[layer exportOptions] sizes] array] lastObject],
-		rect = [[layer absoluteRect] rect],
+	var exportSize
+	if (getSketchVersionNumber() >= 350) {
+		[[layer exportOptions] addExportFormat]
+		exportSize = [[[[layer exportOptions] exportFormats] array] lastObject]
+	} else {
+		[[layer exportOptions] addExportSize]
+		exportSize = [[[[layer exportOptions] sizes] array] lastObject]		
+	}
+	var rect = [[layer absoluteRect] rect],
 		scale = (typeof scale !== 'undefined') ? scale : 1,
 		suffix = (typeof suffix !== 'undefined') ? suffix : "",
 		format = (typeof format !== 'undefined') ? format : "png"
 	exportSize.scale = scale
 	exportSize.name = suffix
 	exportSize.format = format
-	var slice = [MSSliceMaker sliceFromExportSize:exportSize layer:layer inRect:rect useIDForName:false]
+	if (getSketchVersionNumber() >= 350) {
+		var slice = [MSExportRequest exportRequestFromExportFormat:exportSize layer:layer inRect:rect useIDForName:false]
+	} else {
+		var slice = [MSSliceMaker sliceFromExportSize:exportSize layer:layer inRect:rect useIDForName:false]	
+	}
 	[doc saveArtboardOrSlice:slice toFile: path]
 	[exportSize remove]
 	slice = nil
@@ -176,19 +203,21 @@ function addGroup(name, parent) {
 function setBitmapFill(layer, imagePath) {
 	
 	var image = [[NSImage alloc] initWithContentsOfFile:imagePath]
-	if(image) {
-		if( [layer class] == MSShapeGroup ) {
-			var fills = layer.style().fills()
-		        for (var i = 0; i < fills.count(); i++) {
-		            fills.removeStylePartAtIndex(0)
-		        }
-				[fills addNewStylePart]
-			var bmpFill = [fills lastObject],
-				fillCollection = [[bmpFill documentData] images]
-				[bmpFill setFillType:4]
-				[bmpFill setPatternImage:image collection:fillCollection]
-				[bmpFill setPatternFillType:1]
+	if(image && [layer class] == MSShapeGroup) {
+		var fills = layer.style().fills()
+        for (var i = 0; i < fills.count(); i++) {
+            fills.removeStylePartAtIndex(0)
+        }
+		var bmpFill = [fills addNewStylePart],
+			fillCollection
+		[bmpFill setFillType:4]
+		if (getSketchVersionNumber() >= 350) {
+			[bmpFill setPatternImage:image] 
+		} else {
+			fillCollection = [[bmpFill documentData] images]
+			[bmpFill setPatternImage:image collection:fillCollection]	
 		}
+		[bmpFill setPatternFillType:1]
 	}
 }
 

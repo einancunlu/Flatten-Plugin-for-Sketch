@@ -2,6 +2,12 @@
 
 Check out [my Medium post](https://medium.com/design-prototype-develop/flatten-plugin-for-sketch-af2d59b0458#.n2wmykvj5) for details.
 
+# Changelog
+
+## v1.1
+- Fixed compatibility issues with Sketch 3.5.
+- Plugin menu improvements.
+
 ## Installation
 
 #### Best Way:
