@@ -224,7 +224,7 @@ function initCommand(context) {
 	scriptFolder = [scriptPath stringByDeletingLastPathComponent]
 	
 	if (isTodayNewDay() && checkPluginUpdate()) {
-		app.displayDialog_withTitle("Please redownload the plugin to install the new version.", "New plugin update is available!")
+		app.displayDialog_withTitle("Please redownload the plugin to install the new version.", "There is a new version of the plugin!")
 	}
 }
 
