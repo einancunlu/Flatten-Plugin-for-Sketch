@@ -31,7 +31,7 @@ function checkPluginUpdate() {
 	try {
 		var response = getJSONFromURL('https://raw.githubusercontent.com/einancunlu/Flatten-Plugin-for-Sketch/master/Flatten.sketchplugin/Contents/Sketch/manifest.json')
 		if (response && response.version) {
-			if (response.version != manifestJSON.version) {
+			if (response.version.toString() != manifestJSON.version.toString()) {
 				isThereNewVersion = true
 			}
 		}	
