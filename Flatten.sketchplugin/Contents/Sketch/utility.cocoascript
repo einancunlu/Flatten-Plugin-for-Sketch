@@ -185,39 +185,25 @@ function removeLayer(layer) {
 	
   var parent = [layer parentGroup]
   if (parent)[parent removeLayer: layer]
-}
-
-function addLayer(name, type, parent) {
-	
-  var parent = parent ? parent : stage,
-    layer = [parent addLayerOfType: type]
-  if (name)[layer setName: name]
-  return layer
-}
-
-function addGroup(name, parent) {
-	
-  return addLayer(name, 'group', parent)
-}
+} 
 
 function setBitmapFill(layer, imagePath) {
 	
 	var image = [[NSImage alloc] initWithContentsOfFile:imagePath]
+	var imageData = [[MSImageData alloc] initWithImage: image convertColorSpace: false]
 	if(image && [layer class] == MSShapeGroup) {
 		var fills = layer.style().fills()
-        for (var i = 0; i < fills.count(); i++) {
-            fills.removeStylePartAtIndex(0)
-        }
-		var bmpFill = [fills addNewStylePart],
-			fillCollection
-		[bmpFill setFillType:4]
-		if (getSketchVersionNumber() >= 350) {
-			[bmpFill setPatternImage:image] 
+       	fills.removeAllObjects()
+		var bmpFill 
+		var fillCollection
+		if (getSketchVersionNumber() >= 380) { 
+			bmpFill = layer.style().addStylePartOfType(0)
 		} else {
-			fillCollection = [[bmpFill documentData] images]
-			[bmpFill setPatternImage:image collection:fillCollection]	
+			bmpFill = [fills addNewStylePart]
 		}
-		[bmpFill setPatternFillType:1]
+		[bmpFill setFillType: 4]
+		[bmpFill setImage: imageData]
+		[bmpFill setPatternFillType: 1]
 	}
 }
 

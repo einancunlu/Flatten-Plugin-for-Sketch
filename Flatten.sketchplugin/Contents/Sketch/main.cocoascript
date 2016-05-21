@@ -34,7 +34,7 @@ var doc,
 	kLayerVisibilityKey = kPluginDomain + ".layerVisibilityKey",
 	kLastUpdateCheckDayKey = kPluginDomain + ".lastUpdateCheckDayKey",
 	kCuriosityKey = kPluginDomain + ".curiosityKey"
-	
+
 
 //--------------------------------------
 // Menu Commands
@@ -44,7 +44,7 @@ var doc,
 function flatten(context) {
 	
 	initCommand(context)
-	
+
 	var layers
 	if ([selection count] == 0) {
 		var currentArtboard = doc.currentPage().currentArtboard()
@@ -72,6 +72,8 @@ function flatten(context) {
 				}
 				return
 			}
+		} else if ([selection count] == 1 && selection.firstObject().class() != MSArtboardGroup) {
+			
 		}
 		layers = [NSArray array]
 	    for (var i = 0; i < [selection count]; i++) {
@@ -83,7 +85,11 @@ function flatten(context) {
 		addTagToLayers(selection, kFlattenTag)
 		layers = selection
 	}
-    flattenLayers(layers)
+    var imageLayer = flattenLayers(layers)
+	if (typeof imageLayer !== 'undefined') {
+		selection.firstObject().setIsSelected(false)
+		imageLayer.parentGroup().setIsSelected(true)
+	} 
 }
 
 function flattenAll(context) {
@@ -327,7 +333,7 @@ function setImageMode(bool) {
 	if ([selection count] <= 0) {
 		layers = findLayersByTag_inContainer(kFlattenTag)
 	} else {
-		layers = [NSArray array]
+		layers = [NSArray array] 
 	    for (var i = 0; i < [selection count]; i++) {
 	    	var selectedLayer = selection.objectAtIndex(i)
 			layers = layers.arrayByAddingObjectsFromArray(findLayersByTag_inContainer(kFlattenTag, selectedLayer))
@@ -436,15 +442,19 @@ function generateParentGroupName(layerName) {
 
 function createImageLayer(referenceLayer, parent) {
 	
-	var imageLayer = [parent addLayerOfType: 'rectangle']
+	var rectangleShape = MSRectangleShape.alloc().init()
+	var f = referenceLayer.frame()
+	var frame = MSRect.rectWithRect(NSMakeRect(f.x(), f.y(), f.width(), f.height()))
+	rectangleShape.frame = frame
+	var imageLayer = MSShapeGroup.shapeWithPath(rectangleShape)
+	parent.addLayers([imageLayer]) 
 	[command setValue:true forKey: kImageLayerKey onLayer: imageLayer] 
 	if ([parent class] === MSArtboardGroup) {
 		[imageLayer setName: kImageLayerName + " " + kFlattenTag]
 		[parent setName: generateParentGroupName(parent.name())]
 	} else {
 		[imageLayer setName: kImageLayerName]
-	}
-	updateImageLayerRect(imageLayer, referenceLayer)
+	} 
 	return imageLayer
 }
 
