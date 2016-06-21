@@ -445,6 +445,10 @@ function createImageLayer(referenceLayer, parent) {
 	var rectangleShape = MSRectangleShape.alloc().init()
 	var f = referenceLayer.frame()
 	var frame = MSRect.rectWithRect(NSMakeRect(f.x(), f.y(), f.width(), f.height()))
+	if ([referenceLayer class] === MSArtboardGroup) {
+		frame.x = 0
+		frame.y = 0  
+	}
 	rectangleShape.frame = frame
 	var imageLayer = MSShapeGroup.shapeWithPath(rectangleShape)
 	parent.addLayers([imageLayer]) 
