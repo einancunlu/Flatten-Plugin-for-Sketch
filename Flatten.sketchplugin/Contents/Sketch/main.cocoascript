@@ -54,8 +54,9 @@ function flatten(context) {
 		layers = findLayersByTag_inContainer(kFlattenTag, currentArtboard)
 	} else { 
 		if ([selection count] == 1 && selection.firstObject().class() == MSArtboardGroup) {
-			if (!hasImageLayer(selection.firstObject())) {
-				var imageLayer = flattenLayers(selection) 
+			var imageLayer = hasImageLayer(selection.firstObject())
+			if (!imageLayer) {
+				imageLayer = flattenLayers(selection) 
 				var name = "Arboards/" + selection.firstObject().name()
 				var alert = [COSAlertWindow new]
 				alert.setMessageText("Create Shared Layer Style")
@@ -87,9 +88,16 @@ function flatten(context) {
 	}
     var imageLayer = flattenLayers(layers)
 	if (typeof imageLayer !== 'undefined') {
-		selection.firstObject().setIsSelected(false)
-		imageLayer.parentGroup().setIsSelected(true)
-	} 
+		if (selection.count() != 0) selection.firstObject().setIsSelected(false)
+		imageLayer.parentGroup().setIsSelected(true)  
+	}
+}
+
+function toggleGroup(context) {
+	
+	initCommand(context)
+	
+	setImageMode(null)
 }
 
 function flattenAll(context) {
@@ -229,13 +237,18 @@ function initCommand(context) {
 	scriptPath = context.scriptPath
 	scriptFolder = [scriptPath stringByDeletingLastPathComponent]
 	
-	if (isTodayNewDay() && checkPluginUpdate()) {
-		app.displayDialog_withTitle("Please redownload the plugin to install the new version.", "There is a new version of the plugin!")
+	if (isTodayNewDay()) {
+		var updateNote = checkPluginUpdate()
+		if (updateNote) {
+			var title = "Update Available!" 
+			var description = "Please redownload the plugin to install the new version.\n\nWhat is new:\n" + updateNote
+			app.displayDialog_withTitle(description, title) 
+		}
 	}
 }
 
-function isTodayNewDay() {
-	
+function isTodayNewDay() { 
+	return true
 	var lastUpdateCheckDay = [defaults objectForKey: kLastUpdateCheckDayKey]
 	
 	var formatter = [[NSDateFormatter alloc] init]
@@ -318,6 +331,14 @@ function flattenLayers(layers) {
 				var initialVisibility = [command valueForKey: kLayerVisibilityKey onLayer: layerToHide] || true
 				[layerToHide setIsVisible: initialVisibility]
 			}
+			
+			// Sync shared style
+			var isSelectionEmpty = selection.count() == 0
+			imageLayer.setIsSelected(true)
+			var action = doc.actionsController().actionWithID("MSSyncSharedStyleAction")
+			action.syncSharedStyle(imageLayer.style())
+			imageLayer.setIsSelected(false)  
+			layer.setIsSelected(!isSelectionEmpty) 
 		} else {
 			[layer setIsVisible: false]
 		}

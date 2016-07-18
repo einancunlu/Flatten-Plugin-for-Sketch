@@ -4,6 +4,11 @@ Check out my [Medium post](https://medium.com/design-prototype-develop/flatten-p
 
 # Changelog
 
+## v1.3
+- Sketch 3.9 fix.
+- Now artboard shared styles sync automatically after reflattening artboards."
+- New command: Toggle. You can toggle single or multiple flattened layers to edit them easily by selecting the group(s) and run the toggle command.
+
 ## v1.2
 - Sketch 3.8 fix.
 - Now when you flatten a single layer, the selection will be updated to the group created.

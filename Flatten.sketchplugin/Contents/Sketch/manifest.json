@@ -1,10 +1,10 @@
 {
 	"name": "Flatten", 
 	"description": "Flatten single or multiple layers instantly, create shared artboard styles, keep all of them updated like a boss and boost your Sketch documents’ performance.",
-    "lastUpdateNote": "Test:\n- Bla bla\n- Bla bla Bla",
+    "lastUpdateNote": "- Sketch 3.9 fix.\n- Now artboard shared styles sync automatically after reflattening artboards.\n- New command: Toggle. You can toggle single or multiple flattened layers to edit them easily by selecting the group(s) and run the toggle command.",
 	"author": "Emin Inanc Unlu",
 	"homepage": "https://github.com/einancunlu/Flatten-Plugin-for-Sketch",
-    "version": 1.2,
+    "version": 1.3,
 	"compatibleVersion": 3.4,
     "identifier": "com.einancunlu.sketch-plugins.flatten",
     "commands": [
@@ -13,6 +13,13 @@
             "identifier": "flatten",
             "name": "Flatten",
 			"shortcut" : "shift control f",
+            "script": "main.cocoascript" 
+        },
+        {
+            "handler": "toggleGroup", 
+            "identifier": "toggle",
+            "name": "Toggle",
+			"shortcut" : "shift control t",
             "script": "main.cocoascript"
         },
         {
@@ -83,6 +90,7 @@
 		"title": "Flatten",
         "items": [ 
             "flatten",
+			"toggle", 
 			"flattenAll",
 			{
 				"title": "Add Tag",
