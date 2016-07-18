@@ -248,7 +248,7 @@ function initCommand(context) {
 }
 
 function isTodayNewDay() { 
-	return true
+
 	var lastUpdateCheckDay = [defaults objectForKey: kLastUpdateCheckDayKey]
 	
 	var formatter = [[NSDateFormatter alloc] init]
