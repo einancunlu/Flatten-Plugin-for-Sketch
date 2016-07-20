@@ -192,7 +192,7 @@ function setBitmapFill(layer, imagePath) {
 	var image = [[NSImage alloc] initWithContentsOfFile:imagePath]
 	var imageData = [[MSImageData alloc] initWithImage: image convertColorSpace: false]
 	if (image && [layer class] == MSShapeGroup) {
-		layer.style().setFills([[MSArray alloc] init]) 
+		layer.style().setFills([[NSArray alloc] init])
 		var fills = layer.style().fills() 
 		var bmpFill 
 		if (getSketchVersionNumber() >= 380) {
