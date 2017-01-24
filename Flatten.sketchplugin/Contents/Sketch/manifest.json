@@ -11,7 +11,7 @@
         {
             "handler": "flatten",
             "identifier": "flatten",
-            "name": "Flatten",
+            "name": "Flatten Selection or Current Artboard",
 			"shortcut" : "shift control f",
             "script": "main.cocoascript" 
         },
