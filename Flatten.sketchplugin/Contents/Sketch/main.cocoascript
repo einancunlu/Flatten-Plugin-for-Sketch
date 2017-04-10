@@ -335,7 +335,7 @@ function flattenLayers(layers) {
 			// Sync shared style
 			var isSelectionEmpty = selection.count() == 0
 			imageLayer.setIsSelected(true)
-			var action = doc.actionsController().actionWithID("MSSyncSharedStyleAction")
+			var action = doc.actionsController().actionForID("MSSyncSharedStyleAction")
 			action.syncSharedStyle(imageLayer.style())
 			imageLayer.setIsSelected(false)  
 			layer.setIsSelected(!isSelectionEmpty) 

@@ -4,7 +4,7 @@
     "lastUpdateNote": "- Sketch 3.9 fix.\n- Now artboard shared styles sync automatically after reflattening artboards.\n- New command: Toggle. You can toggle single or multiple flattened layers to edit them easily by selecting the group(s) and run the toggle command.",
 	"author": "Emin Inanc Unlu",
 	"homepage": "https://github.com/einancunlu/Flatten-Plugin-for-Sketch",
-    "version": 1.4,
+    "version": 1.5,
 	"compatibleVersion": 3.4,
     "identifier": "com.einancunlu.sketch-plugins.flatten",
     "commands": [ 
