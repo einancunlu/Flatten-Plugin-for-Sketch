@@ -1,6 +1,6 @@
 
 
-/* 
+/*
 The MIT License (MIT)
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
@@ -23,43 +23,13 @@ SOFTWARE.
 */
 
 
-function checkPluginUpdate() {
-
-	var manifestFilePath = scriptFolder + "/manifest.json"
-	var manifestJSON = getJSONFromFile(manifestFilePath)
-	var lastUpdateNote = null
-	try {
-		var response = getJSONFromURL('https://raw.githubusercontent.com/einancunlu/Flatten-Plugin-for-Sketch/master/Flatten.sketchplugin/Contents/Sketch/manifest.json')
-		if (response && response.version) {
-			if (response.version.toString() != manifestJSON.version.toString()) {
-				lastUpdateNote = response.lastUpdateNote.toString() || "- Bug fixes."
-			}
-		}	
-	} catch (e) {
-		log(e)
-		return null
-	}
-	return lastUpdateNote
-}
-
-function getSketchVersionNumber() {
-	
-	const version = [[NSBundle mainBundle] objectForInfoDictionaryKey:@"CFBundleShortVersionString"]
-	var versionNumber = version.stringByReplacingOccurrencesOfString_withString(".", "") + ""
-	while(versionNumber.length != 3) {
-		versionNumber += "0"
-	}
-	return parseInt(versionNumber)
-}
-
-
 //--------------------------------------
 // UserDefaults
 //--------------------------------------
 
 
 function saveObjectToUserDefaults(object, key) {
-	
+
 	var configs  = [NSMutableDictionary dictionary]
 	[configs setObject: object forKey: key]
 	[defaults registerDefaults: configs]
@@ -73,7 +43,7 @@ function saveObjectToUserDefaults(object, key) {
 
 
 function getTempFolderPath(withName) {
-	
+
 	var fileManager = [NSFileManager defaultManager]
 	var cachesURL = [[fileManager URLsForDirectory: NSCachesDirectory inDomains: NSUserDomainMask] lastObject]
 	if(typeof withName !== 'undefined') return [[cachesURL URLByAppendingPathComponent: kPluginDomain] path] + "/" + withName
@@ -81,28 +51,8 @@ function getTempFolderPath(withName) {
 }
 
 function cleanUpTempFolder(folderPath) {
-	
+
 	[[NSFileManager defaultManager] removeItemAtPath: folderPath error: nil]
-}
-
-
-//--------------------------------------
-// JSON
-//--------------------------------------
-
-
-function getJSONFromFile(filePath) {
-	
-	var data = [NSData dataWithContentsOfFile: filePath]
-	return [NSJSONSerialization JSONObjectWithData: data options: 0 error: nil]
-}
-
-function getJSONFromURL(url) {
-	
-	var request = [NSURLRequest requestWithURL: [NSURL URLWithString:url]],
-		response = [NSURLConnection sendSynchronousRequest: request returningResponse: nil error: nil],
-		responseObj = [NSJSONSerialization JSONObjectWithData: response options: nil error: nil]
-	return responseObj
 }
 
 
@@ -114,32 +64,21 @@ function getJSONFromURL(url) {
 function makeExportable(layer, format) {
 
 	var format = (typeof format !== 'undefined') ? format : "png"
-	if (getSketchVersionNumber() >= 350) {
-		var slice = layer.exportOptions().addExportFormat()
-		slice.setFileFormat(format)
-		return slice
-	}
-	
-	var slice = layer.exportOptions().addExportSize()
-	slice.setFormat(format)
+	var slice = layer.exportOptions().addExportFormat()
+	slice.setFileFormat(format)
 	return slice
 }
 
 function removeExportOptions(layer) {
-	
+
 	[[layer exportOptions] removeAllObjects]
 }
 
 function exportLayerToPath(layer, path, scale, format, suffix) {
-	
-	var exportSize 
-	if (getSketchVersionNumber() >= 350) {
-		[[layer exportOptions] addExportFormat]
-		exportSize = [[[layer exportOptions] exportFormats] lastObject]
-	} else {
-		[[layer exportOptions] addExportSize]
-		exportSize = [[[[layer exportOptions] sizes] array] lastObject]		
-	}
+
+	var exportSize
+	[[layer exportOptions] addExportFormat]
+	exportSize = [[[layer exportOptions] exportFormats] lastObject]
 	var rect = [[layer absoluteRect] rect],
 		scale = (typeof scale !== 'undefined') ? scale : 1,
 		suffix = (typeof suffix !== 'undefined') ? suffix : "",
@@ -147,11 +86,7 @@ function exportLayerToPath(layer, path, scale, format, suffix) {
 	exportSize.scale = scale
 	exportSize.name = suffix
 	exportSize.format = format
-	if (getSketchVersionNumber() >= 350) {
-		var slice = [MSExportRequest exportRequestFromExportFormat:exportSize layer:layer inRect:rect useIDForName:false]
-	} else {
-		var slice = [MSSliceMaker sliceFromExportSize:exportSize layer:layer inRect:rect useIDForName:false]	
-	}
+	var slice = [MSExportRequest exportRequestFromExportFormat:exportSize layer:layer inRect:rect useIDForName:false]
 	[doc saveArtboardOrSlice:slice toFile: path]
 	[exportSize remove]
 	slice = nil
@@ -171,7 +106,7 @@ function exportLayerToPath(layer, path, scale, format, suffix) {
 
 
 function getRect(layer) {
-	
+
   var rect = [layer absoluteRect]
   return {
     x: Math.round([rect x]),
@@ -182,24 +117,20 @@ function getRect(layer) {
 }
 
 function removeLayer(layer) {
-	
+
   var parent = [layer parentGroup]
   if (parent)[parent removeLayer: layer]
-} 
- 
+}
+
 function setBitmapFill(layer, imagePath) {
-	
+
 	var image = [[NSImage alloc] initWithContentsOfFile:imagePath]
 	var imageData = [[MSImageData alloc] initWithImage: image convertColorSpace: false]
 	if (image && [layer class] == MSShapeGroup) {
 		layer.style().setFills([[NSArray alloc] init])
-		var fills = layer.style().fills() 
-		var bmpFill 
-		if (getSketchVersionNumber() >= 380) {
-			bmpFill = layer.style().addStylePartOfType(0)
-		} else {
-			bmpFill = [fills addNewStylePart]
-		}
+		var fills = layer.style().fills()
+		var bmpFill
+		bmpFill = layer.style().addStylePartOfType(0)
 		[bmpFill setFillType: 4]
 		[bmpFill setImage: imageData]
 		[bmpFill setPatternFillType: 1]
@@ -213,23 +144,23 @@ function setBitmapFill(layer, imagePath) {
 
 
 var findLayersByTag_inContainer = function(tag, container) {
-	
+
 	var regex = ".*" + tag + "\\b.*"
 	var predicate = NSPredicate.predicateWithFormat(@"name MATCHES[c] %@", regex)
 	return findLayersMatchingPredicate_inContainer_filterByType(predicate, container)
 }
 
 var findLayersNamed_inContainer_filterByType = function(layerName, container, layerType) {
-	
+
     var predicate = (typeof layerType === 'undefined' || layerType == nil) ? NSPredicate.predicateWithFormat("name == %@", layerName) : NSPredicate.predicateWithFormat("name == %@ && class == %@", layerName, layerType)
     return findLayersMatchingPredicate_inContainer_filterByType(predicate, container)
 }
 
 var findLayersMatchingPredicate_inContainer_filterByType = function(predicate, container, layerType) {
-	
+
     var scope
     switch (layerType) {
-        case MSPage: 
+        case MSPage:
             scope = doc.pages()
             return scope.filteredArrayUsingPredicate(predicate)
         break
@@ -267,4 +198,3 @@ var findLayersMatchingPredicate_inContainer_filterByType = function(predicate, c
     }
     return NSArray.array() // Return an empty array if no matches were found
 }
-

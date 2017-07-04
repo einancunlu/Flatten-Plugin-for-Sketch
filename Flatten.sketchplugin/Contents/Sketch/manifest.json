@@ -1,22 +1,22 @@
 {
-	"name": "Flatten", 
+	"name": "Flatten",
 	"description": "Flatten single or multiple layers instantly, create shared artboard styles, keep all of them updated like a boss and boost your Sketch documents’ performance.",
-    "lastUpdateNote": "- Sketch 4.3 fix.",
 	"author": "Emin Inanc Unlu",
 	"homepage": "https://github.com/einancunlu/Flatten-Plugin-for-Sketch",
-    "version": 1.5,
-	"compatibleVersion": 3.4,
+  "version": 1.6,
+	"appcast": "https://raw.githubusercontent.com/einancunlu/Flatten-Plugin-for-Sketch/master/Flatten.sketchplugin/Contents/Sketch/appcast",
+	"compatibleVersion": 4.4,
     "identifier": "com.einancunlu.sketch-plugins.flatten",
-    "commands": [ 
+    "commands": [
         {
             "handler": "flatten",
             "identifier": "flatten",
             "name": "Flatten Selection or Current Artboard",
 			"shortcut" : "shift control f",
-            "script": "main.cocoascript" 
+            "script": "main.cocoascript"
         },
         {
-            "handler": "toggleGroup", 
+            "handler": "toggleGroup",
             "identifier": "toggle",
             "name": "Toggle",
 			"shortcut" : "shift control t",
@@ -67,30 +67,30 @@
         {
             "handler": "help",
             "identifier": "help",
-            "name": "Help / Guide", 
+            "name": "Help / Guide",
 			"shortcut" : "",
             "script": "main.cocoascript"
         },
         {
             "handler": "feedbackByMail",
             "identifier": "feedbackByMail",
-            "name": "Mail", 
+            "name": "Mail",
 			"shortcut" : "",
             "script": "main.cocoascript"
         },
         {
             "handler": "feedbackByTwitter",
             "identifier": "feedbackByTwitter",
-            "name": "Twitter", 
+            "name": "Twitter",
 			"shortcut" : "",
             "script": "main.cocoascript"
         }
     ],
-    "menu": { 
+    "menu": {
 		"title": "Flatten",
-        "items": [ 
+        "items": [
             "flatten",
-			"toggle", 
+			"toggle",
 			"flattenAll",
 			{
 				"title": "Add Tag",
@@ -98,12 +98,12 @@
 					"addFlattenTagToSelections",
 					"addFlattenHiddenTagToSelections"
 		        ]
-			}, 
-			"selectSuggestedLayers",     
-			"-",    
+			},
+			"selectSuggestedLayers",
+			"-",
 			"switchToLayerMode",
-			"switchToImageMode", 
-			"-",    
+			"switchToImageMode",
+			"-",
 			"help",
 			{
 				"title": "Feedback / Contact",

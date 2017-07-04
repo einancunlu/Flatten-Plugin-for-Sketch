@@ -4,6 +4,16 @@ Check out my [Medium post](https://medium.com/design-prototype-develop/flatten-p
 
 # Changelog
 
+## v1.6
+- Sketch 4.5 fix.
+- Support for the plugin update feature of Sketch.
+
+## v1.5
+- Sketch 4.3.1 fix.
+
+## v1.4
+- Bug fix.
+
 ## v1.3
 - Sketch 3.9 fix.
 - Now artboard shared styles sync automatically after reflattening artboards."
@@ -16,15 +26,6 @@ Check out my [Medium post](https://medium.com/design-prototype-develop/flatten-p
 ## v1.1
 - Fixed compatibility issues with Sketch 3.5.
 - Plugin menu improvements.
-
-# Installation
-
-### Manuel:
-Double click the `Flatten.sketchplugin` file to install.
-
-### Sketch Toolbox:
-1. [Download the Sketch Toolbox plugin manager app](http://sketchtoolbox.com) and install.
-2. Search `Flatten` in the app and install.
 
 # Contact
 
