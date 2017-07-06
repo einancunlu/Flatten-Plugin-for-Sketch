@@ -6,7 +6,7 @@
     <description>Flatten single or multiple layers instantly, create shared artboard styles, keep all of them updated like a boss and boost your Sketch documents’ performance.</description>
     <language>en</language>
       <item>
-        <title>Version 1.6.1</title>
+        <title>Version 1.6.2</title>
         <description>
           <![CDATA[
             <ul>
@@ -15,7 +15,7 @@
             </ul>
           ]]>
         </description>
-        <enclosure url="https://github.com/einancunlu/Flatten-Plugin-for-Sketch/releases/download/v1.6.1/Flatten-Plugin-for-Sketch.zip" sparkle:version="1.6.1" />
+        <enclosure url="https://github.com/einancunlu/Flatten-Plugin-for-Sketch/releases/download/v1.6.2/Flatten-Plugin-for-Sketch.zip" sparkle:version="1.6.2" />
       </item>
   </channel>
 </rss>
