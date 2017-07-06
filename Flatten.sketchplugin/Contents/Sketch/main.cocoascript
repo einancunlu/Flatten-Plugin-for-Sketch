@@ -56,7 +56,7 @@ function flatten(context) {
 			var imageLayer = hasImageLayer(selection.firstObject())
 			if (!imageLayer) {
 				imageLayer = flattenLayers(selection)
-				var name = "Arboards/" + selection.firstObject().name()
+				var name = "Artboards / " + selection.firstObject().name()
 				var alert = [COSAlertWindow new]
 				alert.setMessageText("Create Shared Layer Style")
 				alert.setInformativeText("The artboard is flattened. Do you want to create a shared layer style for it?\n\nName of the shared layer style:")
