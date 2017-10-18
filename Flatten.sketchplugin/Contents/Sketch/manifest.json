@@ -3,7 +3,7 @@
 	"description": "Flatten single or multiple layers instantly, create shared artboard styles, keep all of them updated like a boss and boost your Sketch documents’ performance.",
 	"author": "Emin Inanc Unlu",
 	"homepage": "https://github.com/einancunlu/Flatten-Plugin-for-Sketch",
-  	"version": "1.6.2",
+  	"version": "1.6.3",
 	"appcast": "https://raw.githubusercontent.com/einancunlu/Flatten-Plugin-for-Sketch/master/Flatten.sketchplugin/Contents/Sketch/appcast",
 	"compatibleVersion": 4.4,
     "identifier": "com.einancunlu.sketch-plugins.flatten",

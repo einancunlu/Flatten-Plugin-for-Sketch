@@ -4,6 +4,9 @@ Check out my [Medium post](https://medium.com/design-prototype-develop/flatten-p
 
 # Changelog
 
+## v1.6.3
+- Sketch 4.7 fix.
+
 ## v1.6
 - Sketch 4.5 fix.
 - Support for the plugin update feature of Sketch.

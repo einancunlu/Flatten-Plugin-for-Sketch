@@ -125,7 +125,12 @@ function removeLayer(layer) {
 function setBitmapFill(layer, imagePath) {
 
 	var image = [[NSImage alloc] initWithContentsOfFile:imagePath]
-	var imageData = [[MSImageData alloc] initWithImage: image convertColorSpace: false]
+	var imageData
+	if (MSApplicationMetadata.metadata().appVersion < 47) {
+	    var imageData = MSImageData.alloc().initWithImage_convertColorSpace(image, false);
+	} else {
+	    var imageData = MSImageData.alloc().initWithImage(image);
+	}
 	if (image && [layer class] == MSShapeGroup) {
 		layer.style().setFills([[NSArray alloc] init])
 		var fills = layer.style().fills()
