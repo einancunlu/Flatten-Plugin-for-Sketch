@@ -1,3 +1,8 @@
+# Depreciated Temporarily / Plugin Stopped Working
+I will rewrite the plugin in the future when I have time and when the Sketch plugin API has a complete documentation. 
+
+Sorry for the inconvenience...
+
 # Flatten Plugin for Sketch
 
 Check out my [Medium post](https://medium.com/design-prototype-develop/flatten-plugin-for-sketch-af2d59b0458#.n2wmykvj5) for the details.
