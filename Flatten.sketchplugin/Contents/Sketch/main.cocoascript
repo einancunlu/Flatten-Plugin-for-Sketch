@@ -68,7 +68,12 @@ function flatten(context) {
 					var textfield = [alert viewAtIndex: 0]
 					name = [textfield stringValue]
 					var layerStyles = doc.documentData().layerStyles()
-			        var layerStyle = layerStyles.addSharedStyleWithName_firstInstance(name, imageLayer.style())
+					if(layerStyles.addSharedStyleWithName_firstInstance) {
+			        		var layerStyle = layerStyles.addSharedStyleWithName_firstInstance(name, imageLayer.style())
+					} else {
+						var layerStyle = MSSharedStyle.alloc().initWithName_firstInstance(name, imageLayer.style())
+						layerStyles.addSharedObject(layerStyle)
+					}
 				}
 				return
 			}
@@ -320,8 +325,12 @@ function flattenLayers(layers) {
 			// Sync shared style
 			var isSelectionEmpty = selection.count() == 0
 			[imageLayer select: true byExpandingSelection: false]
-			var action = doc.actionsController().actionForID("MSSyncSharedStyleAction")
-			action.syncSharedStyle(imageLayer.style())
+			if(imageLayer.updateSharedStyleToMatchSelf) {
+				imageLayer.updateSharedStyleToMatchSelf()
+			} else {
+				var action = doc.actionsController().actionForID("MSSyncSharedStyleAction")
+				action.syncSharedStyle(imageLayer.style())
+			}
 			var action = doc.actionsController().actionForID("MSMoveToFrontAction")
 			action.moveToFront(imageLayer)
 			[imageLayer select: false byExpandingSelection: false]
