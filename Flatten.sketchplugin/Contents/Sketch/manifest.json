@@ -1,117 +1,162 @@
 {
-	"name": "Flatten",
-	"description": "Flatten single or multiple layers instantly, create shared artboard styles, keep all of them updated like a boss and boost your Sketch documents’ performance.",
-	"author": "Emin Inanc Unlu",
-	"homepage": "https://github.com/einancunlu/Flatten-Plugin-for-Sketch",
-  	"version": "1.6.3",
-	"appcast": "https://raw.githubusercontent.com/einancunlu/Flatten-Plugin-for-Sketch/master/Flatten.sketchplugin/Contents/Sketch/appcast",
-	"compatibleVersion": 4.4,
-    "identifier": "com.einancunlu.sketch-plugins.flatten",
-    "commands": [
-        {
-            "handler": "flatten",
-            "identifier": "flatten",
-            "name": "Flatten Selection or Current Artboard",
-			"shortcut" : "shift control f",
-            "script": "main.cocoascript"
-        },
-        {
-            "handler": "toggleGroup",
-            "identifier": "toggle",
-            "name": "Toggle",
-			"shortcut" : "shift control t",
-            "script": "main.cocoascript"
-        },
-        {
-            "handler": "flattenAll",
-            "identifier": "flattenAll",
-            "name": "Flatten All",
-			"shortcut" : "",
-            "script": "main.cocoascript"
-        },
-        {
-            "handler": "switchToImageMode",
-            "identifier": "switchToImageMode",
-            "name": "Image Mode",
-			"shortcut" : "",
-            "script": "main.cocoascript"
-        },
-        {
-            "handler": "switchToLayerMode",
-            "identifier": "switchToLayerMode",
-            "name": "Layer Mode",
-			"shortcut" : "",
-            "script": "main.cocoascript"
-        },
-        {
-            "handler": "selectSuggestedLayers",
-            "identifier": "selectSuggestedLayers",
-            "name": "Suggested Layers",
-			"shortcut" : "",
-            "script": "main.cocoascript"
-        },
-        {
-            "handler": "addFlattenTagToSelections",
-            "identifier": "addFlattenTagToSelections",
-            "name": "#Flatten",
-			"shortcut" : "",
-            "script": "main.cocoascript"
-        },
-        {
-            "handler": "addFlattenHiddenTagToSelections",
-            "identifier": "addFlattenHiddenTagToSelections",
-            "name": "#FlattenHidden",
-			"shortcut" : "",
-            "script": "main.cocoascript"
-        },
-        {
-            "handler": "help",
-            "identifier": "help",
-            "name": "Help / Guide",
-			"shortcut" : "",
-            "script": "main.cocoascript"
-        },
-        {
-            "handler": "feedbackByMail",
-            "identifier": "feedbackByMail",
-            "name": "Mail",
-			"shortcut" : "",
-            "script": "main.cocoascript"
-        },
-        {
-            "handler": "feedbackByTwitter",
-            "identifier": "feedbackByTwitter",
-            "name": "Twitter",
-			"shortcut" : "",
-            "script": "main.cocoascript"
+  "name": "Flatten",
+  "description": "Flatten and mirror layers without destructing and update them like a boss.",
+  "icon": "icon.png",
+  "author": "Emin Inanc Unlu",
+  "homepage": "https://github.com/einancunlu/Flatten-Plugin-for-Sketch",
+  "version": "2.0.1",
+  "appcast": "https://raw.githubusercontent.com/einancunlu/Flatten-Plugin-for-Sketch/master/appcast.xml",
+  "compatibleVersion": 50,
+  "identifier": "com.einancunlu.sketch-plugins.flatten",
+  "commands": [
+    {
+      "name": "📷 Flatten (Selection or Current Artboard)",
+      "identifier": "flatten",
+      "handler": "flatten",
+      "script": "script.js",
+      "shortcut": "shift control f"
+    },
+    {
+      "handler": "flattenAll",
+      "identifier": "flattenAll",
+      "name": "🎞 Flatten All",
+      "script": "script.js"
+    },
+    {
+      "handler": "unflattenSelection",
+      "identifier": "unflattenSelection",
+      "name": "♻️ Unflatten Selection",
+      "script": "script.js"
+    },
+    {
+      "name": "Selection Changed",
+      "identifier": "selection-changed",
+      "handlers": {
+        "actions": {
+          "SelectionChanged.finish": "onSelectionChanged"
         }
-    ],
-    "menu": {
-		"title": "Flatten",
-        "items": [
-            "flatten",
-			"toggle",
-			"flattenAll",
-			{
-				"title": "Add Tag",
-		        "items": [
-					"addFlattenTagToSelections",
-					"addFlattenHiddenTagToSelections"
-		        ]
-			},
-			"selectSuggestedLayers",
-			"-",
-			"switchToLayerMode",
-			"switchToImageMode",
-			"-",
-			"help",
-			{
-				"title": "Feedback / Contact",
-		        "items": [
-					"feedbackByMail",
-					"feedbackByTwitter"
-		        ]
-			}
-        ]
+      },
+      "script": "script.js"
+    },
+    {
+      "handler": "toggleSelection",
+      "identifier": "toggleSelection",
+      "name": "🔄 Toggle Selection",
+      "shortcut": "shift control t",
+      "script": "script.js"
+    },
+    {
+      "handler": "switchToImageMode",
+      "identifier": "switchToImageMode",
+      "name": "🏞 Image Mode (Selection or All)",
+      "script": "script.js"
+    },
+    {
+      "handler": "switchToLayerMode",
+      "identifier": "switchToLayerMode",
+      "name": "💎 Layer Mode (Selection or All)",
+      "script": "script.js"
+    },
+    {
+      "handler": "addFlattenTagToSelection",
+      "identifier": "addFlattenTagToSelection",
+      "name": "#flatten",
+      "script": "script.js"
+    },
+    {
+      "handler": "addExcludeTagToSelection",
+      "identifier": "addExcludeTagToSelection",
+      "name": "#exclude",
+      "script": "script.js"
+    },
+    {
+      "handler": "addScaleTagToSelection",
+      "identifier": "addScaleTagToSelection",
+      "name": "Customized Scale (e.g. #s3, #s0.02)",
+      "script": "script.js"
+    },
+    {
+      "handler": "addDisableAutoTagToSelection",
+      "identifier": "addDisableAutoTagToSelection",
+      "name": "#no-auto",
+      "script": "script.js"
+    },
+    {
+      "handler": "addStayHiddenTagToSelection",
+      "identifier": "addStayHiddenTagToSelection",
+      "name": "#stay-hidden",
+      "script": "script.js"
+    },
+    {
+      "handler": "settings",
+      "identifier": "settings",
+      "name": "⚙️ Settings...",
+      "script": "script.js"
+    },
+    {
+      "handler": "manual",
+      "identifier": "manual",
+      "name": "📖 Manual",
+      "script": "script.js"
+    },
+    {
+      "handler": "feedbackByMail",
+      "identifier": "feedbackByMail",
+      "name": "Mail",
+      "script": "script.js"
+    },
+    {
+      "handler": "feedbackByTwitter",
+      "identifier": "feedbackByTwitter",
+      "name": "Twitter",
+      "script": "script.js"
+    },
+    {
+      "handler": "about",
+      "identifier": "about",
+      "name": "👋 About",
+      "script": "script.js"
+    },
+    {
+      "handler": "donation",
+      "identifier": "donation",
+      "name": "☕️ Buy me a Coffee / Support the Development",
+      "script": "script.js"
     }
+  ],
+  "menu": {
+    "title": "Flatten 📷",
+    "items": [
+      "flatten",
+      "flattenAll",
+      "unflattenSelection",
+      {
+        "title": "🏷 Add Tag",
+        "items": [
+          "addFlattenTagToSelection",
+          "addExcludeTagToSelection",
+          "addScaleTagToSelection",
+          "addStayHiddenTagToSelection",
+          "addDisableAutoTagToSelection"
+        ]
+      },
+      "-",
+      "toggleSelection",
+      "switchToLayerMode",
+      "switchToImageMode",
+      "-",
+      "settings",
+      "manual",
+      {
+        "title": "💬 Feedback / Contact",
+        "items": [
+          "feedbackByMail",
+          "feedbackByTwitter"
+        ]
+      },
+      "-",
+      "about",
+      "donation"
+    ]
+  }
 }
