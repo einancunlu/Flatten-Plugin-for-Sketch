@@ -4,7 +4,7 @@
   "icon": "icon.png",
   "author": "Emin Inanc Unlu",
   "homepage": "https://github.com/einancunlu/Flatten-Plugin-for-Sketch",
-  "version": "2.0.1",
+  "version": "2.0.2",
   "appcast": "https://raw.githubusercontent.com/einancunlu/Flatten-Plugin-for-Sketch/master/appcast.xml",
   "compatibleVersion": 50,
   "identifier": "com.einancunlu.sketch-plugins.flatten",

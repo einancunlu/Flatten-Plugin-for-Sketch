@@ -420,7 +420,7 @@ function onSelectionChanged(context) {
       if (hasTag(layer, disableAutoTag)) return
       // When the image layer of the artboard is selected, update all the
       // the flattened layers inside
-      if (!a && Settings.layerSettingForKey(layer, kArtboardOfImageLayerKey) === parent.id) {
+      if (Settings.layerSettingForKey(layer, kArtboardOfImageLayerKey) === parent.id) {
         if (isArtboard(parent) && hasTag(layer, flattenTag)) {
           flattenLayers(findAllSublayersWithFlattenTag(parent.layers))
         }
