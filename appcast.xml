@@ -8,7 +8,7 @@
     <item>
       <title>Version 2.1.0</title>
       <sparkle:releaseNotesLink>https://github.com/einancunlu/Flatten-Plugin-for-Sketch</sparkle:releaseNotesLink>
-      <enclosure url="https://github.com/einancunlu/Flatten-Plugin-for-Sketch/releases/download/v2.1.0/Flatten-Plugin-for-Sketch.zip" sparkle:version="2.1.0"/>
+      <enclosure url="https://github.com/einancunlu/Flatten-Plugin-for-Sketch/releases/download/v.2.1.0/Flatten-Plugin-for-Sketch.zip" sparkle:version="2.1.0"/>
     </item>
     <item>
       <enclosure url="https://github.com/einancunlu/Flatten-Plugin-for-Sketch/releases/download/v2.0.2/Flatten-Plugin-for-Sketch.zip" sparkle:version="2.0.2"/>
