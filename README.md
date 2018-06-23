@@ -2,8 +2,12 @@
 
 Version 2 is here! Check out my new [Medium post](https://medium.com/@einancunlu/flatten-2-0-sketch-plugin-f53984696990) for all the new features!
 
+# Installation
+
+With Sketch Runner, just go to the `install` command and search for `Flatten`. Runner allows you to manage plugins and do much more to speed up your workflow in Sketch. [Download Runner here](http://www.sketchrunner.com).
+
 <a href="http://bit.ly/SketchRunnerWebsite">
-  <img src="http://bit.ly/RunnerBadgeBlue">
+  <img width="160" height="41" src="http://bit.ly/RunnerBadgeBlue">
 </a>
 
 # Changelog
