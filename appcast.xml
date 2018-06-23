@@ -1,12 +1,13 @@
-
 <?xml version="1.0" encoding="utf-8"?>
 <rss version="2.0" xmlns:sparkle="http://www.andymatuschak.org/xml-namespaces/sparkle" xmlns:dc="http://purl.org/dc/elements/1.1/">
   <channel>
     <title>Flatten</title>
-    <link>http://sparkle-project.org/files/sparkletestcast.xml</link>
-    <description>Flatten and mirror layers without destructing and update them like a boss.</description>
+    <link>https://raw.githubusercontent.com/einancunlu/Flatten-Plugin-for-Sketch/master/appcast.xml</link>
+    <description>Flatten and mirror layers without destructing and update them like a boss.</description>
     <language>en</language>
     <item>
+      <title>Version 2.1.0</title>
+      <sparkle:releaseNotesLink>https://github.com/einancunlu/Flatten-Plugin-for-Sketch</sparkle:releaseNotesLink>
       <enclosure url="https://github.com/einancunlu/Flatten-Plugin-for-Sketch/releases/download/v2.1.0/Flatten-Plugin-for-Sketch.zip" sparkle:version="2.1.0"/>
     </item>
     <item>
