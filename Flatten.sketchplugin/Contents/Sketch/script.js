@@ -38,7 +38,9 @@ const sketch = require('sketch/dom'),
   kGroupKey = kPluginDomain + '.groupKey',
   kImageLayerKey = kPluginDomain + '.imageLayerKey',
   kArtboardOfImageLayerKey = kPluginDomain + '.artboardOfImageLayerKey',
-  kLayerToBeFlattened = kPluginDomain + '.LayerToBeFlattened',
+  kTempBgLayerKey = kPluginDomain + '.tempBgLayerKey',
+  kReferenceLayerOfPreviewLayerKey = kPluginDomain + '.layerOfPreviewLayerKey',
+  kLayerToBeFlattened = kPluginDomain + '.layerToBeFlattened',
   kLayerVisibilityKey = kPluginDomain + '.layerVisibilityKey',
   kImageLayerNameKey = kPluginDomain + '.imageLayerNameKey',
   kSharedStyleNamePrefixKey = kPluginDomain + '.sharedStyleNamePrefixKey',
@@ -58,11 +60,11 @@ const sketch = require('sketch/dom'),
   noLayerFoundMessage = "⚠️ No layer found to be flattened. Use 'Flatten' command to create one.",
   emptySelectionMessage = '⚠️ Please select something!',
 
-  // Utilities
+  // Utilitiess
   FillType = { Solid: 0, Gradient: 1, Pattern: 4, Noise: 5 },
   PatternFillType = { Tile: 0, Fill: 1, Stretch: 2, Fit: 3 }
 
-var document, selection,
+var document, savedContext, selection, developmentMode = false,
 
   // Settable constants
   imageLayerName = Settings.settingForKey(kImageLayerNameKey),
@@ -83,6 +85,7 @@ if (!defaultFlattenScale) defaultFlattenScale = 1
 function initCommand(context) {
 
   document = sketch.getSelectedDocument()
+  savedContext = context
   selection = document.selectedLayers
 }
 
@@ -90,6 +93,7 @@ function initCommand(context) {
 function flatten(context) {
 
   initCommand(context)
+  sendEvent(context, 'Command', 'Flatten', 'Started', selection.length)
   var firstSelection = selection
   var layersToBeFlattened
   var imageLayer
@@ -101,13 +105,15 @@ function flatten(context) {
     }
     layersToBeFlattened = findLayersByTag_inContainer(flattenTag, currentArtboard)
     layersToBeFlattened = fromNativeArray(layersToBeFlattened)
+    sendEvent(context, 'Command', 'Flatten', 'Current artboard')
   } else {
-    // If the selection is just an artboard
+    // If the selection is an artboard
     if (selection.length === 1) {
       const layer = firstSelection.layers[0]
       if (isImageLayer(layer) && isArtboard(layer.parent)) {
         if (isImageLayerOfArtboard(layer, layer.parent) && hasTag(layer, flattenTag)) {
           selection = layer.parent
+          sendEvent(context, 'Command', 'Flatten', 'Selected artboard')
         } else {
           return
         }
@@ -121,7 +127,6 @@ function flatten(context) {
   if (layersToBeFlattened.length === 0) {
     addTagToLayers(selection.layers, flattenTag)
     layersToBeFlattened = findAllSublayersWithFlattenTag(selection.layers)
-		// layersToBeFlattened = selection.layers
   }
   // Flatten all layers
   imageLayer = flattenLayers(layersToBeFlattened)
@@ -146,6 +151,8 @@ function flatten(context) {
           input = textfield.stringValue()
           layerStyle = MSSharedStyle.alloc().initWithName_firstInstance(input, imageLayer.sketchObject.style())
           context.document.documentData().layerStyles().addSharedObject(layerStyle)
+          document.sketchObject.reloadInspector()
+          sendEvent(context, 'Command', 'Flatten', 'Created new artboard style')
         }
       }
     }
@@ -162,10 +169,10 @@ function flatten(context) {
 function flattenAll(context) {
 
   initCommand(context)
-
   const layersToBeFlattened = findLayersByTag_inContainer(flattenTag)
+  sendEvent(context, 'Command', 'Flatten All', 'Started', layersToBeFlattened.length)
   if (layersToBeFlattened.length === 0) {
-    UI.message(kNoLayerFoundMessage)
+    UI.message(noLayerFoundMessage)
   } else {
     flattenLayers(fromNativeArray(layersToBeFlattened))
     UI.message("Flattening process is completed.")
@@ -173,40 +180,63 @@ function flattenAll(context) {
 }
 
 ////////
-function unflattenSelection(context) {
+function createPreview(context) {
 
   initCommand(context)
+  sendEvent(context, 'Command', 'Generate Preview', 'Started', selection.length)
+
   if (selection.length === 0) {
     UI.message(emptySelectionMessage)
     return
   }
   for (const layer of selection.layers) {
-    if (isFlattenedGroup(layer)) {
-      if (!isFlattenedGroupValid(layer)) {
-        UI.message("⚠️ One of the selection isn't a proper flattened group.")
-      } else {
-        var imageLayer, actualLayer
-        for (const childLayer of layer.layers) {
-          if (isImageLayer(childLayer)) {
-            imageLayer = childLayer
-          } else if (hasTag(childLayer, flattenTag)) {
-            actualLayer = childLayer
-          }
-        }
-        if (imageLayer) imageLayer.remove()
-        if (actualLayer) actualLayer.hidden = false
-        actualLayer.name = generateGroupName(actualLayer.name)
-        layer.sketchObject.ungroup()
-        actualLayer.sketchObject.select_byExpandingSelection(true, false)
-      }
-    } else if (Settings.layerSettingForKey(layer, kArtboardOfImageLayerKey)) {
-      const arboardId = Settings.layerSettingForKey(layer, kArtboardOfImageLayerKey)
-      const artboard = document.getLayerWithID(arboardId)
-      if (artboard) layer.name = artboard.name
-      else UI.message("⚠️ Couldn't find the attached artboard, so couldn't recover the name.")
+    // Create image layer
+    var imageLayer, parent
+    if (isArtboard(layer)) {
+      imageLayer = getImageLayer(layer)
+      parent = imageLayer.parent
     } else {
-      UI.message("⚠️ Couldn't find anything to unflatten.")
+      addTagToLayers([layer], flattenTag)
+      imageLayer = getImageLayer(layer)
+      parent = imageLayer.parent
     }
+    // Flatten the layer with stay-hidden and scale tags
+    addTagToLayers([imageLayer], stayHiddenTag)
+    addTagToLayers([imageLayer], scaleTagPrefix + '4')
+    flattenLayers([layer])
+    // Create shared layer style
+    const styleName = 'Temporary/Preview'
+    const layerStyle = MSSharedStyle.alloc().initWithName_firstInstance(styleName, imageLayer.sketchObject.style())
+    document.sketchObject.documentData().layerStyles().addSharedObject(layerStyle)
+    // Create preview layer
+    const duplicateImageLayer = imageLayer.duplicate()
+    Settings.setLayerSettingForKey(duplicateImageLayer, kReferenceLayerOfPreviewLayerKey, parent.id)
+    duplicateImageLayer.sketchObject.moveToLayer_beforeLayer(parent.parent.sketchObject, parent.sketchObject)
+    duplicateImageLayer.moveForward()
+    duplicateImageLayer.name = 'Preview'
+    duplicateImageLayer.hidden = false
+    duplicateImageLayer.frame = parent.frame
+    duplicateImageLayer.frame.x = parent.frame.x + parent.frame.width + 1
+    duplicateImageLayer.frame.y = parent.frame.y
+    const zoomValue = document.sketchObject.zoomValue()
+    duplicateImageLayer.frame.scale(1/zoomValue)
+    selection.clear()
+    parent.sketchObject.select_byExpandingSelection(true, false)
+  }
+}
+
+////////
+function restoreSelection(context) {
+
+  initCommand(context)
+  sendEvent(context, 'Command', 'Recover Selection', 'Started', selection.length)
+
+  if (selection.length === 0) {
+    UI.message(emptySelectionMessage)
+    return
+  }
+  for (const layer of selection.layers) {
+    recoverLayer(layer)
   }
 }
 
@@ -214,6 +244,8 @@ function unflattenSelection(context) {
 function toggleSelection(context) {
 
   initCommand(context)
+  sendEvent(context, 'Command', 'Toggle Selection', 'Started', selection.length)
+
   if (selection.length === 0) {
     UI.message(emptySelectionMessage)
   } else {
@@ -225,6 +257,8 @@ function toggleSelection(context) {
 function switchToImageMode(context) {
 
   initCommand(context)
+  sendEvent(context, 'Command', 'Switch to Image Mode', 'Started', selection.length)
+
   setImageModeForSelectionOrAll(true)
   if (selection.length === 0) {
     UI.message("Switched to image mode in all flattened groups. (Switch in specific groups by selecting groups.)")
@@ -237,6 +271,8 @@ function switchToImageMode(context) {
 function switchToLayerMode(context) {
 
   initCommand(context)
+  sendEvent(context, 'Command', 'Switch to Layer Mode', 'Started', selection.length)
+
   setImageModeForSelectionOrAll(false)
   if (selection.length === 0) {
     UI.message("Switched to layer mode in all flattened groups. (Switch in specific groups by selecting groups.)")
@@ -249,7 +285,9 @@ function switchToLayerMode(context) {
 function addFlattenTagToSelection(context) {
 
   initCommand(context)
-  if (selection.length === 0) UI.message(kEmptySelectionMessage)
+  sendEvent(context, 'Command', 'Add Flatten Tag', 'Started', selection.length)
+
+  if (selection.length === 0) UI.message(emptySelectionMessage)
   else addTagToLayers(selection.layers, flattenTag)
 }
 
@@ -257,7 +295,9 @@ function addFlattenTagToSelection(context) {
 function addExcludeTagToSelection(context) {
 
   initCommand(context)
-  if (selection.length === 0) UI.message(kEmptySelectionMessage)
+  sendEvent(context, 'Command', 'Add Exclude Tag', 'Started', selection.length)
+
+  if (selection.length === 0) UI.message(emptySelectionMessage)
   else addTagToLayers(selection.layers, excludeTag)
 }
 
@@ -265,7 +305,9 @@ function addExcludeTagToSelection(context) {
 function addScaleTagToSelection(context) {
 
   initCommand(context)
-  if (selection.length === 0) UI.message(kEmptySelectionMessage)
+  sendEvent(context, 'Command', 'Add Scale Tag', 'Started', selection.length)
+
+  if (selection.length === 0) UI.message(emptySelectionMessage)
   else addTagToLayers(selection.layers, `${scaleTagPrefix}0.05`)
 }
 
@@ -273,7 +315,9 @@ function addScaleTagToSelection(context) {
 function addDisableAutoTagToSelection(context) {
 
   initCommand(context)
-  if (selection.length === 0) UI.message(kEmptySelectionMessage)
+  sendEvent(context, 'Command', 'Add Disable Auto Tag', 'Started', selection.length)
+
+  if (selection.length === 0) UI.message(emptySelectionMessage)
   else addTagToLayers(selection.layers, disableAutoTag)
 }
 
@@ -281,7 +325,9 @@ function addDisableAutoTagToSelection(context) {
 function addStayHiddenTagToSelection(context) {
 
   initCommand(context)
-  if (selection.length === 0) UI.message(kEmptySelectionMessage)
+  sendEvent(context, 'Command', 'Add Stay Hidden Tag', 'Started', selection.length)
+
+  if (selection.length === 0) UI.message(emptySelectionMessage)
   else addTagToLayers(selection.layers, stayHiddenTag)
 }
 
@@ -289,8 +335,10 @@ function addStayHiddenTagToSelection(context) {
 function settings(context) {
 
   initCommand(context)
+  sendEvent(context, 'Command', 'Settings', 'Started')
+
   const alert = COSAlertWindow.new()
-  const path = context.plugin.urlForResourceNamed("icon.png").path()
+  const path = context.plugin.urlForResourceNamed("logo.png").path()
   const icon = NSImage.alloc().initByReferencingFile(path)
   alert.setIcon(icon)
 	alert.setMessageText("Settings")
@@ -330,9 +378,13 @@ function settings(context) {
     imageLayerSharedStyleNamePrefix = String(alert.viewAtIndex(6).stringValue())
     Settings.setSettingForKey(kSharedStyleNamePrefixKey, imageLayerSharedStyleNamePrefix)
 
+    const value = `Auto: ${autoFunctionsEnabled}, Scale: ${scale}, Image Layer Name: ${imageLayerName}, Image Layer Shared Style Prefix: ${imageLayerSharedStyleNamePrefix}`
+    sendEvent(context, 'Command', 'Settings', 'Save', value)
+
 	} else if (responseCode == 1002) {
 
-    // User clicked on default button
+    // User clicked on reset button
+    sendEvent(context, 'Command', 'Settings', 'Reset')
     autoFunctionsEnabled = '1'
     Settings.setSettingForKey(kAutoFunctionsEnabledKey, autoFunctionsEnabled)
 
@@ -351,6 +403,8 @@ function settings(context) {
 function manual(context) {
 
   initCommand(context)
+  sendEvent(context, 'Command', 'Manual', 'Started')
+
   const urlString = "https://medium.com/@einancunlu/flatten-2-0-sketch-plugin-f53984696990"
   openLinkInBrowser(urlString)
 }
@@ -359,6 +413,8 @@ function manual(context) {
 function feedbackByMail(context) {
 
   initCommand(context)
+  sendEvent(context, 'Command', 'Feedback by Mail', 'Started')
+
   const to = encodeURI("einancunlu" + "@gma" + "il.com")
   const urlString = "mailto:" + to
   openLinkInBrowser(urlString)
@@ -368,6 +424,8 @@ function feedbackByMail(context) {
 function feedbackByTwitter(context) {
 
   initCommand(context)
+  sendEvent(context, 'Command', 'Feedback by Twitter', 'Started')
+
   const urlString = "https://twitter.com/einancunlu"
   openLinkInBrowser(urlString)
 }
@@ -376,6 +434,8 @@ function feedbackByTwitter(context) {
 function about(context) {
 
   initCommand(context)
+  sendEvent(context, 'Command', 'About', 'Started')
+
   const urlString = "http://emin.space/?ref=flattenplugin"
   openLinkInBrowser(urlString)
 }
@@ -384,6 +444,8 @@ function about(context) {
 function donation(context) {
 
   initCommand(context)
+  sendEvent(context, 'Command', 'Donation', 'Started')
+
   const urlString = "https://www.buymeacoffee.com/6SXFyDupj"
   openLinkInBrowser(urlString)
 }
@@ -395,7 +457,9 @@ function donation(context) {
 ////////
 function onSelectionChanged(context) {
 
+  savedContext = context
   if (autoFunctionsEnabled === '0') return
+  if (NSEvent.pressedMouseButtons() === 2) return // BUG: Doesn't solve completely.
   const action = context.actionContext
   const newSelection = fromNativeArray(action.newSelection)
   // const oldSelection = fromNativeArray(action.oldSelection)
@@ -409,12 +473,14 @@ function onSelectionChanged(context) {
         // Update it when an image layer is selected
         const actualLayer = parent.layers[(layer.index === 1 ? 0 : 1)]
         flattenLayers([actualLayer])
+        sendEvent(context, 'Auto', 'Selected', 'Image layer')
       } else if (hasTag(layer, flattenTag)) {
         // Set actual layer visible when it's selected
         if (hasTag(layer, stayHiddenTag)) return
         const imageLayer = parent.layers[(layer.index === 1 ? 0 : 1)]
         layer.hidden = false
         imageLayer.hidden = true
+        sendEvent(context, 'Auto', 'Selected', 'Actual layer')
       }
     } else if (isImageLayer(layer)) {
       if (hasTag(layer, disableAutoTag)) return
@@ -423,6 +489,7 @@ function onSelectionChanged(context) {
       if (Settings.layerSettingForKey(layer, kArtboardOfImageLayerKey) === parent.id) {
         if (isArtboard(parent) && hasTag(layer, flattenTag)) {
           flattenLayers(findAllSublayersWithFlattenTag(parent.layers))
+          sendEvent(context, 'Auto', 'Selected', 'Image layer of artboard')
         }
       }
     }
@@ -448,8 +515,8 @@ function isImageLayer(layer) {
 ////////
 function hasImageLayer(artboard) {
 
-  for (const layer of artboard.layers) {
-    if (isImageLayer(layer)) return layer
+  for (const layer of artboard.layers.reverse()) {
+    if (isImageLayer(layer) && hasTag(layer, flattenTag)) return layer
   })
 	return false
 }
@@ -457,6 +524,7 @@ function hasImageLayer(artboard) {
 ////////
 function flattenLayers(layers) {
 
+  sendEvent(savedContext, 'Function', 'FlattenLayers', 'Started', layers.length)
   const returnLayer = layers.length === 1
   for (var layer of layers) {
     if (isChildOfFlattenedGroup(layer)) continue
@@ -466,11 +534,13 @@ function flattenLayers(layers) {
     if (isImageLayer(layer)) {
       imageLayer = layer
       if (isArtboard(parent)) {
+        sendEvent(savedContext, 'Function', 'FlattenLayers', 'Flattened artboard')
         layer = parent
         layerIsArtboard = true
       } else {
         layer = parent.layers[(imageLayer.index === 1 ? 0 : 1)]
         if (!layer || !hasTag(layer, flattenTag)) continue
+        sendEvent(savedContext, 'Function', 'FlattenLayers', 'Flattened group')
       }
     } else {
       // Skip the layer if it's hidden
@@ -478,11 +548,12 @@ function flattenLayers(layers) {
         if (layer.hidden) continue
       }
       imageLayer = getImageLayer(layer)
+      sendEvent(savedContext, 'Function', 'FlattenLayers', 'Layer')
     }
     // Prepare for flattening: set visibility of layers
     var backgroundLayer
     if (layerIsArtboard) {
-      backgroundLayer = createArtboardBackgroudColorLayer(layer)
+      backgroundLayer = createArtboardBackgroudColorLayer(layer) // BUG: Right click.
     }
     imageLayer.hidden = true
     var layersToHide
@@ -501,7 +572,7 @@ function flattenLayers(layers) {
       const artboard = getArtboardOfLayer(layer)
       if (artboard) {
         Settings.setLayerSettingForKey(layer, kLayerToBeFlattened, true)
-        duplicateArtboard = artboard.duplicate()
+        duplicateArtboard = artboard.duplicate() // BUG: Right click.
         duplicateArtboard.adjustToFit()
         createArtboardBackgroudColorLayer(duplicateArtboard)
         // Find the layer to be flattened in the duplicate
@@ -530,7 +601,7 @@ function flattenLayers(layers) {
       })
       // Sync shared style
       imageLayer.sketchObject.updateSharedStyleToMatchSelf()
-      imageLayer.moveToFront()
+      imageLayer.moveToFront() // BUG: Right click.
     } else {
       layer.hidden = true && !hasTag(imageLayer, stayHiddenTag)
       // Sync shared style if it exists
@@ -645,8 +716,9 @@ function createArtboardBackgroudColorLayer(artboard) {
   } else {
     backgroundColor = '#ffffff'
   }
+  // BUG: Right click.
   const layer = new sketch.Shape({
-    parent: artboard, name: 'temp-bg', selected: false,
+    parent: artboard, name: 'temp-bg',
     frame: new sketch.Rectangle(0,0, artboard.frame.width, artboard.frame.height),
     style: {
       fills: [{ color: backgroundColor, fillType: sketch.Style.FillType.Color }]
@@ -659,7 +731,8 @@ function createArtboardBackgroudColorLayer(artboard) {
 ////////
 function generateGroupName(layerName) {
 
-  return layerName.replace(' ' + flattenTag, '');
+  const regex = new RegExp(' #flatten.*', 'g')
+  return layerName.replace(regex, '')
 }
 
 ////////
@@ -808,6 +881,66 @@ function isImageLayerOfArtboard(imageLayer, artboard) {
 
   const arboardID = Settings.layerSettingForKey(imageLayer, kArtboardOfImageLayerKey)
   return (arboardID && arboardID === artboard.id)
+}
+
+////////
+function recoverLayer(layer) {
+
+  if (isFlattenedGroup(layer)) {
+    // Unflatten the flattened group
+    if (!isFlattenedGroupValid(layer)) {
+      UI.message("⚠️ It's isn't a proper flattened group. (Layer: " + layer.name + ")")
+    } else {
+      var imageLayer, actualLayer
+      for (const childLayer of layer.layers) {
+        if (isImageLayer(childLayer)) {
+          imageLayer = childLayer
+        } else if (hasTag(childLayer, flattenTag)) {
+          actualLayer = childLayer
+        }
+      }
+      if (imageLayer) imageLayer.remove()
+      if (actualLayer) actualLayer.hidden = false
+      actualLayer.name = generateGroupName(actualLayer.name)
+      layer.sketchObject.ungroup()
+      actualLayer.sketchObject.select_byExpandingSelection(true, false)
+      sendEvent(savedContext, 'Function', 'Recover Layer', 'Flattened group')
+    }
+  } else if (isArtboard(layer))) {
+    // Delete the image layer and shared style if exists
+    if (hasImageLayer(layer)) {
+      const imageLayer = getImageLayer(layer)
+      const layerStyles = document.sketchObject.documentData().layerStyles()
+      const sharedStyle = layerStyles.sharedStyleWithID(imageLayer.sketchObject.style().sharedObjectID())
+      layerStyles.removeSharedStyle(sharedStyle)
+      document.sketchObject.reloadInspector()
+      imageLayer.remove()
+      sendEvent(savedContext, 'Function', 'Recover Layer', 'Artboard')
+    } else {
+      UI.message("⚠️ It's isn't a flattened artboard. (Layer: " + layer.name + ")")
+    }
+  } else if (referenceLayerID = Settings.layerSettingForKey(layer, kReferenceLayerOfPreviewLayerKey)) {
+    // Delete the preview layer and unflatten the attached flattened group
+    const referenceLayer = document.getLayerWithID(referenceLayerID)
+    if (!isArtboard(referenceLayer)) {
+      const layerStyles = document.sketchObject.documentData().layerStyles()
+      const sharedStyle = layerStyles.sharedStyleWithID(layer.sketchObject.style().sharedObjectID())
+      layerStyles.removeSharedStyle(sharedStyle)
+      document.sketchObject.reloadInspector()
+    }
+    layer.remove()
+    recoverLayer(referenceLayer)
+    sendEvent(savedContext, 'Function', 'Recover Layer', 'Preview layer')
+  } else if (Settings.layerSettingForKey(layer, kArtboardOfImageLayerKey)) {
+    // Rename the image layer of an artboard
+    const arboardId = Settings.layerSettingForKey(layer, kArtboardOfImageLayerKey)
+    const artboard = document.getLayerWithID(arboardId)
+    if (artboard) layer.name = artboard.name
+    else UI.message("⚠️ Couldn't recover the name. (Couldn't find any attached artboard.)")
+    sendEvent(savedContext, 'Function', 'Recover Layer', 'Image layer')
+  } else {
+    UI.message("⚠️ Couldn't find anything to recover. (Layer: " + layer.name + ")")
+  }
 }
 
 //------------------------------------------------------------------------------
@@ -967,6 +1100,66 @@ function findLayersMatchingPredicate_inContainer_filterByType(predicate, contain
       }
   }
   return NSArray.array() // Return an empty array if no matches were found
+}
+
+//------------------------------------------------------------------------------
+// ANALYTICS
+//------------------------------------------------------------------------------
+
+var kUUIDKey = 'google.analytics.uuid'
+var uuid = NSUserDefaults.standardUserDefaults().objectForKey(kUUIDKey)
+if (!uuid) {
+  uuid = NSUUID.UUID().UUIDString()
+  NSUserDefaults.standardUserDefaults().setObject_forKey(uuid, kUUIDKey)
+}
+
+////////
+function jsonToQueryString(json) {
+
+  return '?' + Object.keys(json).map(function (key) {
+    return encodeURIComponent(key) + '=' + encodeURIComponent(json[key]);
+  }).join('&')
+}
+
+////////
+var index = function (context, trackingId, hitType, props) {
+
+  var payload = {
+    v: 1,
+    tid: trackingId,
+    ds: 'Sketch ' + NSBundle.mainBundle().objectForInfoDictionaryKey("CFBundleShortVersionString"),
+    cid: uuid,
+    t: hitType,
+    an: context.plugin.name(),
+    aid: context.plugin.identifier(),
+    av: context.plugin.version()
+  }
+  if (props) {
+    Object.keys(props).forEach(function (key) {
+      payload[key] = props[key]
+    })
+  }
+
+  var url = NSURL.URLWithString(
+    NSString.stringWithFormat("https://www.google-analytics.com/collect%@", jsonToQueryString(payload))
+  )
+
+  if (url) {
+    NSURLSession.sharedSession().dataTaskWithURL(url).resume()
+  }
+}
+
+////////
+function sendEvent(context, category, action, label, value) {
+
+  log(category + " - " + action + " - " + label + " - " + value)
+  if (developmentMode) return
+  const payload = {}
+  if (category) payload.ec = category
+  if (action) payload.ea = action
+  if (label) payload.el = label
+  if (value) payload.ev = value
+  return index(context, 'UA-34242159-5', 'event', payload)
 }
 
 //------------------------------------------------------------------------------

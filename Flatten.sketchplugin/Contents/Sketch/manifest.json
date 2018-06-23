@@ -1,36 +1,49 @@
 {
   "name": "Flatten",
   "description": "Flatten and mirror layers without destructing and update them like a boss.",
-  "icon": "icon.png",
+  "icon": "logo.png",
   "author": "Emin Inanc Unlu",
   "homepage": "https://github.com/einancunlu/Flatten-Plugin-for-Sketch",
-  "version": "2.0.2",
+  "version": "2.1.0",
   "appcast": "https://raw.githubusercontent.com/einancunlu/Flatten-Plugin-for-Sketch/master/appcast.xml",
   "compatibleVersion": 50,
   "identifier": "com.einancunlu.sketch-plugins.flatten",
   "commands": [
     {
-      "name": "📷 Flatten (Selection or Current Artboard)",
+      "name": "📷 Flatten",
+      "shortcut": "shift control f",
+      "description" : "Flatten the selection or the current artboard",
+      "icon" : "Icons/flatten.png",
       "identifier": "flatten",
       "handler": "flatten",
-      "script": "script.js",
-      "shortcut": "shift control f"
-    },
-    {
-      "handler": "flattenAll",
-      "identifier": "flattenAll",
-      "name": "🎞 Flatten All",
       "script": "script.js"
     },
     {
-      "handler": "unflattenSelection",
-      "identifier": "unflattenSelection",
-      "name": "♻️ Unflatten Selection",
+      "name": "🎥 Flatten All",
+      "description" : "Update all the flattened layers",
+      "icon" : "Icons/flattenAll.png",
+      "identifier": "flattenAll",
+      "handler": "flattenAll",
+      "script": "script.js"
+    },
+    {
+      "name": "🔍 Create Preview Layer",
+      "description" : "For the selection (artboard or any layer)",
+      "icon" : "Icons/createPreview.png",
+      "identifier": "createPreview",
+      "handler": "createPreview",
+      "script": "script.js"
+    },
+    {
+      "name": "♻️ Restore",
+      "description" : "Unflatten, rename the image layer or delete the preview",
+      "icon" : "Icons/restoreSelection.png",
+      "identifier": "restoreSelection",
+      "handler": "restoreSelection",
       "script": "script.js"
     },
     {
       "name": "Selection Changed",
-      "identifier": "selection-changed",
       "handlers": {
         "actions": {
           "SelectionChanged.finish": "onSelectionChanged"
@@ -39,88 +52,116 @@
       "script": "script.js"
     },
     {
-      "handler": "toggleSelection",
-      "identifier": "toggleSelection",
-      "name": "🔄 Toggle Selection",
+      "name": "🔄 Toggle",
       "shortcut": "shift control t",
+      "description" : "Toggle between the image layer and the actual layer",
+      "icon" : "Icons/toggleSelection.png",
+      "identifier": "toggleSelection",
+      "handler": "toggleSelection",
       "script": "script.js"
     },
     {
-      "handler": "switchToImageMode",
+      "name": "🏞 Image Mode",
+      "description" : "Switch to image mode in the selection or all",
+      "icon" : "Icons/switchToImageMode.png",
       "identifier": "switchToImageMode",
-      "name": "🏞 Image Mode (Selection or All)",
+      "handler": "switchToImageMode",
       "script": "script.js"
     },
     {
-      "handler": "switchToLayerMode",
+      "name": "💎 Layer Mode",
+      "description" : "Switch to layer mode in the selection or all",
+      "icon" : "Icons/switchToLayerMode.png",
       "identifier": "switchToLayerMode",
-      "name": "💎 Layer Mode (Selection or All)",
+      "handler": "switchToLayerMode",
       "script": "script.js"
     },
     {
-      "handler": "addFlattenTagToSelection",
-      "identifier": "addFlattenTagToSelection",
       "name": "#flatten",
+      "description" : "Add #flatten tag to the selection",
+      "icon" : "Icons/addTagToSelection.png",
+      "identifier": "addFlattenTagToSelection",
+      "handler": "addFlattenTagToSelection",
       "script": "script.js"
     },
     {
-      "handler": "addExcludeTagToSelection",
-      "identifier": "addExcludeTagToSelection",
       "name": "#exclude",
+      "description" : "Add #exclude tag to the selection",
+      "icon" : "Icons/addTagToSelection.png",
+      "identifier": "addExcludeTagToSelection",
+      "handler": "addExcludeTagToSelection",
       "script": "script.js"
     },
     {
-      "handler": "addScaleTagToSelection",
+      "name": "#s0.02 (Example Customized Scale)",
+      "description" : "Add customized scale tag to the selection (other examples: #s3, #s2)",
+      "icon" : "Icons/addTagToSelection.png",
       "identifier": "addScaleTagToSelection",
-      "name": "Customized Scale (e.g. #s3, #s0.02)",
+      "handler": "addScaleTagToSelection",
       "script": "script.js"
     },
     {
-      "handler": "addDisableAutoTagToSelection",
-      "identifier": "addDisableAutoTagToSelection",
       "name": "#no-auto",
+      "description" : "Add #no-auto tag to the selection",
+      "icon" : "Icons/addTagToSelection.png",
+      "identifier": "addDisableAutoTagToSelection",
+      "handler": "addDisableAutoTagToSelection",
       "script": "script.js"
     },
     {
-      "handler": "addStayHiddenTagToSelection",
-      "identifier": "addStayHiddenTagToSelection",
       "name": "#stay-hidden",
+      "description" : "Add #stay-hidden tag to the selection",
+      "icon" : "Icons/addTagToSelection.png",
+      "identifier": "addStayHiddenTagToSelection",
+      "handler": "addStayHiddenTagToSelection",
       "script": "script.js"
     },
     {
-      "handler": "settings",
-      "identifier": "settings",
       "name": "⚙️ Settings...",
+      "description" : "Open the settings panel",
+      "icon" : "Icons/settings.png",
+      "identifier": "settings",
+      "handler": "settings",
       "script": "script.js"
     },
     {
-      "handler": "manual",
-      "identifier": "manual",
       "name": "📖 Manual",
+      "description" : "Learn all the details and how to use the plugin",
+      "icon" : "Icons/manual.png",
+      "identifier": "manual",
+      "handler": "manual",
       "script": "script.js"
     },
     {
-      "handler": "feedbackByMail",
-      "identifier": "feedbackByMail",
       "name": "Mail",
+      "description" : "Contact via email",
+      "icon" : "Icons/feedbackByMail.png",
+      "identifier": "feedbackByMail",
+      "handler": "feedbackByMail",
       "script": "script.js"
     },
     {
-      "handler": "feedbackByTwitter",
-      "identifier": "feedbackByTwitter",
       "name": "Twitter",
+      "description" : "Contact via Twitter",
+      "icon" : "Icons/feedbackByTwitter.png",
+      "identifier": "feedbackByTwitter",
+      "handler": "feedbackByTwitter",
       "script": "script.js"
     },
     {
-      "handler": "about",
-      "identifier": "about",
-      "name": "👋 About",
-      "script": "script.js"
-    },
-    {
-      "handler": "donation",
+      "name": "☕️ Buy me a Cup of Coffee",
+      "description" : "Support the development and encoure me for more updates!",
+      "icon" : "Icons/donation.png",
       "identifier": "donation",
-      "name": "☕️ Buy me a Coffee / Support the Development",
+      "handler": "donation",
+      "script": "script.js"
+    },
+    {
+      "name": "👋 About",
+      "description" : "Open my website: www.emin.space",
+      "icon" : "Icons/about.png",
+      "identifier": "about",
+      "handler": "about",
       "script": "script.js"
     }
   ],
@@ -129,7 +170,8 @@
     "items": [
       "flatten",
       "flattenAll",
-      "unflattenSelection",
+      "createPreview",
+      "restoreSelection",
       {
         "title": "🏷 Add Tag",
         "items": [
@@ -155,8 +197,8 @@
         ]
       },
       "-",
-      "about",
-      "donation"
+      "donation",
+      "about"
     ]
   }
 }
