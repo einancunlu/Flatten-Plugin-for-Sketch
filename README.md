@@ -12,6 +12,20 @@ With Sketch Runner, just go to the `install` command and search for `Flatten`. R
 
 # Changelog
 
+## Game Over...
+Here my answer to a message:
+
+Hi X,
+
+It's great to hear that some people use my plugin. I wish I had enough time and resources to fix it. Unfortunately it's really unlikely.
+
+I don't have enough time, but more importantly, Sketch doesn't make anything easier for plugin developers. They don't update their plugin development kit and documentation as they should do. So, every time they change things, we need to try and find out the problem. This is really abrasive. I updated my plugin so many times saying to myself that it's for the last time, but it just kept happening. So I really don't have any more patient left nor willing. Sketch team seems really reckless (or impulsive) about the plugins, developers, users and documentation.
+
+So, no more Sketch for me. I'm planning to switch to Figma soon. They stopped being revolutionary anyway, they are doing nothing good enough IMHO. Every update is mess and I really don't like how they plan things out. I suggest you to do the same. I'm just waiting for the second stage update of the plugin development kit of Figma (they did the first stage already). As soon as they have the plugin support, I will delete Sketch for forever, probably. Really sorry for that... :(
+
+Bests,
+Emin
+
 ## v2.1.0
 
 - Now, it's easier than ever to create a preview layer from an artboard or layer with a command instead of creating it yourself. It automatically detects the zoom value of the viewport and creates the preview layer scaled to be seen in 100% zoom value. I will update the Medium post soon to show the changes, stay tuned!
