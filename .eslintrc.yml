@@ -1,0 +1,26 @@
+---
+root: true
+extends:
+  - airbnb
+  - plugin:import/errors
+  - prettier
+plugins:
+  - no-not-accumulator-reassign
+  - prettier
+env:
+  node: true
+rules:
+  import/no-unresolved:
+    - error
+    - commonjs: true
+      caseSensitive: true
+      ignore:
+        - '^sketch(\/|$)'
+  no-param-reassign: 0
+  import/no-extraneous-dependencies: 0
+  jsx-a11y/accessible-emoji: 0
+  no-underscore-dangle: 0
+  react/no-array-index-key: 0
+  react/require-default-props: 0
+  import/prefer-default-export: 0
+  no-plusplus: 0
